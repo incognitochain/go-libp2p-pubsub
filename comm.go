@@ -30,7 +30,7 @@ func (p *PubSub) getHelloPacket() *RPC {
 }
 
 func (p *PubSub) handleNewStream(s network.Stream) {
-	r := ggio.NewDelimitedReader(s, 1<<20)
+	r := ggio.NewDelimitedReader(s, 1<<22)
 	for {
 		rpc := new(RPC)
 		err := r.ReadMsg(&rpc.RPC)
