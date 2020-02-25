@@ -11,7 +11,7 @@ import (
 
 	ggio "github.com/gogo/protobuf/io"
 	proto "github.com/gogo/protobuf/proto"
-	pb "github.com/libp2p/go-libp2p-pubsub/pb"
+	pb "github.com/incognitochain/go-libp2p-pubsub/pb"
 
 	ms "github.com/multiformats/go-multistream"
 )
@@ -85,7 +85,7 @@ func (p *PubSub) handleNewPeer(ctx context.Context, pid peer.ID, outgoing <-chan
 }
 
 func (p *PubSub) handlePeerEOF(ctx context.Context, s network.Stream) {
-	r := ggio.NewDelimitedReader(s, 1<<20)
+	r := ggio.NewDelimitedReader(s, 1<<22)
 	rpc := new(RPC)
 	for {
 		err := r.ReadMsg(&rpc.RPC)

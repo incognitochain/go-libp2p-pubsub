@@ -1,4 +1,4 @@
-module github.com/libp2p/go-libp2p-pubsub
+module github.com/incognitochain/go-libp2p-pubsub
 
 require (
 	github.com/gogo/protobuf v1.2.1
@@ -11,3 +11,5 @@ require (
 	github.com/multiformats/go-multistream v0.1.0
 	github.com/whyrusleeping/timecache v0.0.0-20160911033111-cfcb2f1abfee
 )
+
+go 1.13
