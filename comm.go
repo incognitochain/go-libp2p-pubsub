@@ -48,7 +48,7 @@ func (p *PubSub) handleNewStream(s network.Stream) {
 	for {
 		rpc := new(RPC)
 		err := r.ReadMsg(&rpc.RPC)
-		fmt.Println("aaaaaaaaaaaaaaaa", time.Now())
+		fmt.Println("aaaaaaaaaaaaaaaa", time.Now().UnixNano())
 		if err != nil {
 			if err != io.EOF {
 				s.Reset()
