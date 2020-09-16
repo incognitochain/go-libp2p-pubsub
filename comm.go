@@ -3,7 +3,9 @@ package pubsub
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"io"
+	"time"
 
 	"github.com/libp2p/go-libp2p-core/helpers"
 	"github.com/libp2p/go-libp2p-core/network"
@@ -46,6 +48,7 @@ func (p *PubSub) handleNewStream(s network.Stream) {
 	for {
 		rpc := new(RPC)
 		err := r.ReadMsg(&rpc.RPC)
+		fmt.Println("aaaaaaaaaaaaaaaa", time.Now())
 		if err != nil {
 			if err != io.EOF {
 				s.Reset()
