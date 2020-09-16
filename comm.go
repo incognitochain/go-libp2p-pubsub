@@ -47,8 +47,9 @@ func (p *PubSub) handleNewStream(s network.Stream) {
 	r := protoio.NewDelimitedReader(s, p.maxMessageSize)
 	for {
 		rpc := new(RPC)
+		fmt.Println("reading", time.Now().UnixNano())
 		err := r.ReadMsg(&rpc.RPC)
-		fmt.Println("aaaaaaaaaaaaaaaa", time.Now().UnixNano())
+		fmt.Println("got", time.Now().UnixNano())
 		if err != nil {
 			if err != io.EOF {
 				s.Reset()
