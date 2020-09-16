@@ -45,11 +45,12 @@ func (p *PubSub) getHelloPacket() *RPC {
 
 func (p *PubSub) handleNewStream(s network.Stream) {
 	r := protoio.NewDelimitedReader(s, p.maxMessageSize)
+	fmt.Println("reading", time.Now().UnixNano())
+	rpc := new(RPC)
+	err := r.ReadMsg(&rpc.RPC)
+	fmt.Println("got", time.Now().UnixNano())
 	for {
-		rpc := new(RPC)
-		fmt.Println("reading", time.Now().UnixNano())
-		err := r.ReadMsg(&rpc.RPC)
-		fmt.Println("got", time.Now().UnixNano())
+		time.Sleep(5 * time.Hour)
 		if err != nil {
 			if err != io.EOF {
 				s.Reset()
