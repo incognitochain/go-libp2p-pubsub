@@ -3,8 +3,6 @@ package pubsub
 import (
 	"bufio"
 	"context"
-	"fmt"
-	"io"
 	"time"
 
 	"github.com/libp2p/go-libp2p-core/helpers"
@@ -44,33 +42,33 @@ func (p *PubSub) getHelloPacket() *RPC {
 }
 
 func (p *PubSub) handleNewStream(s network.Stream) {
-	r := protoio.NewDelimitedReader(s, p.maxMessageSize)
-	fmt.Println("reading", time.Now().UnixNano())
-	rpc := new(RPC)
-	err := r.ReadMsg(&rpc.RPC)
-	fmt.Println("got", time.Now().UnixNano())
+	// r := protoio.NewDelimitedReader(s, p.maxMessageSize)
+	// fmt.Println("reading", time.Now().UnixNano())
+	// rpc := new(RPC)
+	// err := r.ReadMsg(&rpc.RPC)
+	// fmt.Println("got", time.Now().UnixNano())
 	for {
 		time.Sleep(5 * time.Hour)
-		if err != nil {
-			if err != io.EOF {
-				s.Reset()
-				log.Debugf("error reading rpc from %s: %s", s.Conn().RemotePeer(), err)
-			} else {
-				// Just be nice. They probably won't read this
-				// but it doesn't hurt to send it.
-				s.Close()
-			}
-			return
-		}
+		// if err != nil {
+		// 	if err != io.EOF {
+		// 		s.Reset()
+		// 		log.Debugf("error reading rpc from %s: %s", s.Conn().RemotePeer(), err)
+		// 	} else {
+		// 		// Just be nice. They probably won't read this
+		// 		// but it doesn't hurt to send it.
+		// 		s.Close()
+		// 	}
+		// 	return
+		// }
 
-		rpc.from = s.Conn().RemotePeer()
-		select {
-		case p.incoming <- rpc:
-		case <-p.ctx.Done():
-			// Close is useless because the other side isn't reading.
-			s.Reset()
-			return
-		}
+		// rpc.from = s.Conn().RemotePeer()
+		// select {
+		// case p.incoming <- rpc:
+		// case <-p.ctx.Done():
+		// 	// Close is useless because the other side isn't reading.
+		// 	s.Reset()
+		// 	return
+		// }
 	}
 }
 
