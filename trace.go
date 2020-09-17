@@ -6,7 +6,7 @@ import (
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/protocol"
 
-	pb "github.com/libp2p/go-libp2p-pubsub/pb"
+	pb "github.com/incognitochain/go-libp2p-pubsub/pb"
 )
 
 // Generic event tracer interface
@@ -46,6 +46,8 @@ func (t *pubsubTracer) PublishMessage(msg *Message) {
 		return
 	}
 
+	size := new(int64)
+	*size = int64(msg.Size())
 	now := time.Now().UnixNano()
 	evt := &pb.TraceEvent{
 		Type:      pb.TraceEvent_PUBLISH_MESSAGE.Enum(),
@@ -54,6 +56,7 @@ func (t *pubsubTracer) PublishMessage(msg *Message) {
 		PublishMessage: &pb.TraceEvent_PublishMessage{
 			MessageID: []byte(t.msgID(msg.Message)),
 			Topics:    msg.Message.TopicIDs,
+			MsgSize:   size,
 		},
 	}
 
@@ -88,6 +91,8 @@ func (t *pubsubTracer) RejectMessage(msg *Message, reason string) {
 	}
 
 	now := time.Now().UnixNano()
+	size := new(int64)
+	*size = int64(msg.Size())
 	evt := &pb.TraceEvent{
 		Type:      pb.TraceEvent_REJECT_MESSAGE.Enum(),
 		PeerID:    []byte(t.pid),
@@ -97,6 +102,7 @@ func (t *pubsubTracer) RejectMessage(msg *Message, reason string) {
 			ReceivedFrom: []byte(msg.ReceivedFrom),
 			Reason:       &reason,
 			Topics:       msg.TopicIDs,
+			MsgSize:      size,
 		},
 	}
 
@@ -249,13 +255,16 @@ func (t *pubsubTracer) SendRPC(rpc *RPC, p peer.ID) {
 	}
 
 	now := time.Now().UnixNano()
+	size := new(int64)
+	*size = int64(rpc.RPC.Size())
 	evt := &pb.TraceEvent{
 		Type:      pb.TraceEvent_SEND_RPC.Enum(),
 		PeerID:    []byte(t.pid),
 		Timestamp: &now,
 		SendRPC: &pb.TraceEvent_SendRPC{
-			SendTo: []byte(p),
-			Meta:   t.traceRPCMeta(rpc),
+			SendTo:  []byte(p),
+			Meta:    t.traceRPCMeta(rpc),
+			MsgSize: size,
 		},
 	}
 
@@ -272,13 +281,16 @@ func (t *pubsubTracer) DropRPC(rpc *RPC, p peer.ID) {
 	}
 
 	now := time.Now().UnixNano()
+	size := new(int64)
+	*size = int64(rpc.RPC.Size())
 	evt := &pb.TraceEvent{
 		Type:      pb.TraceEvent_DROP_RPC.Enum(),
 		PeerID:    []byte(t.pid),
 		Timestamp: &now,
 		DropRPC: &pb.TraceEvent_DropRPC{
-			SendTo: []byte(p),
-			Meta:   t.traceRPCMeta(rpc),
+			SendTo:  []byte(p),
+			Meta:    t.traceRPCMeta(rpc),
+			MsgSize: size,
 		},
 	}
 

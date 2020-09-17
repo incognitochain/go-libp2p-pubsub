@@ -40,6 +40,7 @@ message TraceEvent {
   message PublishMessage {
     optional bytes messageID = 1;
     repeated string topics = 2;
+    required int64 msgSize = 3;
   }
 
   message RejectMessage {
@@ -47,6 +48,7 @@ message TraceEvent {
     optional bytes receivedFrom = 2;
     optional string reason = 3;
     repeated string topics = 4;
+    required int64 msgSize = 5;
   }
 
   message DuplicateMessage {
@@ -72,18 +74,19 @@ message TraceEvent {
   message RecvRPC {
     optional bytes receivedFrom = 1;
     optional RPCMeta meta = 2;
-    optional int64 msgSize = 3;
+    required int64 msgSize = 3;
   }
 
   message SendRPC {
     optional bytes sendTo = 1;
     optional RPCMeta meta = 2;
-    optional int64 msgSize = 3;
+    required int64 msgSize = 3;
   }
 
   message DropRPC {
     optional bytes sendTo = 1;
     optional RPCMeta meta = 2;
+    required int64 msgSize = 3;
   }
 
   message Join {
