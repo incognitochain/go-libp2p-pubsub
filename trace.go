@@ -235,9 +235,6 @@ func (t *pubsubTracer) RecvRPC(rpc *RPC) {
 	}
 
 	now := time.Now().UnixNano()
-	// size := new(int64)
-	// if rpc.RPC.
-	// *size = int64(rpc.XXX_Size())
 	evt := &pb.TraceEvent{
 		Type:      pb.TraceEvent_RECV_RPC.Enum(),
 		PeerID:    []byte(t.pid),
@@ -245,7 +242,6 @@ func (t *pubsubTracer) RecvRPC(rpc *RPC) {
 		RecvRPC: &pb.TraceEvent_RecvRPC{
 			ReceivedFrom: []byte(rpc.from),
 			Meta:         t.traceRPCMeta(rpc),
-			// MsgSize:      0,
 		},
 	}
 
