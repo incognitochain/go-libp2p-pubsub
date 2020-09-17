@@ -155,6 +155,8 @@ func (t *pubsubTracer) DeliverMessage(msg *Message) {
 	}
 
 	now := time.Now().UnixNano()
+	size := new(int64)
+	*size = int64(msg.Size())
 	evt := &pb.TraceEvent{
 		Type:      pb.TraceEvent_DELIVER_MESSAGE.Enum(),
 		PeerID:    []byte(t.pid),
@@ -162,6 +164,7 @@ func (t *pubsubTracer) DeliverMessage(msg *Message) {
 		DeliverMessage: &pb.TraceEvent_DeliverMessage{
 			MessageID: []byte(t.msgID(msg.Message)),
 			Topics:    msg.TopicIDs,
+			MsgSize:   size,
 		},
 	}
 
@@ -232,6 +235,8 @@ func (t *pubsubTracer) RecvRPC(rpc *RPC) {
 	}
 
 	now := time.Now().UnixNano()
+	size := new(int64)
+	*size = int64(rpc.RPC.Size())
 	evt := &pb.TraceEvent{
 		Type:      pb.TraceEvent_RECV_RPC.Enum(),
 		PeerID:    []byte(t.pid),
@@ -239,6 +244,7 @@ func (t *pubsubTracer) RecvRPC(rpc *RPC) {
 		RecvRPC: &pb.TraceEvent_RecvRPC{
 			ReceivedFrom: []byte(rpc.from),
 			Meta:         t.traceRPCMeta(rpc),
+			MsgSize:      size,
 		},
 	}
 

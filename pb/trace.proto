@@ -60,6 +60,7 @@ message TraceEvent {
   message DeliverMessage {
     optional bytes messageID = 1;
     repeated string topics = 2;
+    required int64 msgSize = 3;
   }
 
   message AddPeer {
