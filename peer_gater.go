@@ -13,7 +13,7 @@ import (
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/protocol"
 
-	manet "github.com/multiformats/go-multiaddr-net"
+	manet "github.com/multiformats/go-multiaddr/net"
 )
 
 var (
@@ -396,10 +396,8 @@ func (pg *peerGater) DeliverMessage(msg *Message) {
 
 	st := pg.getPeerStats(msg.ReceivedFrom)
 
-	weight := 0.0
-	for _, topic := range msg.GetTopicIDs() {
-		weight += pg.params.TopicDeliveryWeights[topic]
-	}
+	topic := msg.GetTopic()
+	weight := pg.params.TopicDeliveryWeights[topic]
 
 	if weight == 0 {
 		weight = 1

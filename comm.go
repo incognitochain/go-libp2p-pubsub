@@ -5,7 +5,6 @@ import (
 	"context"
 	"io"
 
-	"github.com/libp2p/go-libp2p-core/helpers"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
 
@@ -42,6 +41,25 @@ func (p *PubSub) getHelloPacket() *RPC {
 }
 
 func (p *PubSub) handleNewStream(s network.Stream) {
+	peer := s.Conn().RemotePeer()
+
+	p.inboundStreamsMx.Lock()
+	other, dup := p.inboundStreams[peer]
+	if dup {
+		log.Debugf("duplicate inbound stream from %s; resetting other stream", peer)
+		other.Reset()
+	}
+	p.inboundStreams[peer] = s
+	p.inboundStreamsMx.Unlock()
+
+	defer func() {
+		p.inboundStreamsMx.Lock()
+		if p.inboundStreams[peer] == s {
+			delete(p.inboundStreams, peer)
+		}
+		p.inboundStreamsMx.Unlock()
+	}()
+
 	r := protoio.NewDelimitedReader(s, p.maxMessageSize)
 	for {
 		rpc := new(RPC)
@@ -55,10 +73,11 @@ func (p *PubSub) handleNewStream(s network.Stream) {
 				// but it doesn't hurt to send it.
 				s.Close()
 			}
+
 			return
 		}
 
-		rpc.from = s.Conn().RemotePeer()
+		rpc.from = peer
 		select {
 		case p.incoming <- rpc:
 		case <-p.ctx.Done():
@@ -125,7 +144,7 @@ func (p *PubSub) handleSendingMessages(ctx context.Context, s network.Stream, ou
 		return bufw.Flush()
 	}
 
-	defer helpers.FullClose(s)
+	defer s.Close()
 	for {
 		select {
 		case rpc, ok := <-outgoing:

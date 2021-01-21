@@ -7,6 +7,7 @@ import (
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
 	math "math"
+	math_bits "math/bits"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -18,7 +19,8 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3     // please upgrade the proto package
+const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type TraceEvent_Type int32
 
@@ -126,7 +128,16 @@ func (m *TraceEvent) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent.Unmarshal(m, b)
 }
 func (m *TraceEvent) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent.Merge(m, src)
@@ -254,8 +265,7 @@ func (m *TraceEvent) GetPrune() *TraceEvent_Prune {
 
 type TraceEvent_PublishMessage struct {
 	MessageID            []byte   `protobuf:"bytes,1,opt,name=messageID" json:"messageID,omitempty"`
-	Topics               []string `protobuf:"bytes,2,rep,name=topics" json:"topics,omitempty"`
-	MsgSize              *int64   `protobuf:"varint,3,req,name=msgSize" json:"msgSize,omitempty"`
+	Topic                *string  `protobuf:"bytes,2,opt,name=topic" json:"topic,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -272,7 +282,16 @@ func (m *TraceEvent_PublishMessage) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_PublishMessage.Unmarshal(m, b)
 }
 func (m *TraceEvent_PublishMessage) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_PublishMessage.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_PublishMessage.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_PublishMessage) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_PublishMessage.Merge(m, src)
@@ -293,11 +312,11 @@ func (m *TraceEvent_PublishMessage) GetMessageID() []byte {
 	return nil
 }
 
-func (m *TraceEvent_PublishMessage) GetTopics() []string {
-	if m != nil {
-		return m.Topics
+func (m *TraceEvent_PublishMessage) GetTopic() string {
+	if m != nil && m.Topic != nil {
+		return *m.Topic
 	}
-	return nil
+	return ""
 }
 
 func (m *TraceEvent_PublishMessage) GetMsgSize() int64 {
@@ -311,8 +330,7 @@ type TraceEvent_RejectMessage struct {
 	MessageID            []byte   `protobuf:"bytes,1,opt,name=messageID" json:"messageID,omitempty"`
 	ReceivedFrom         []byte   `protobuf:"bytes,2,opt,name=receivedFrom" json:"receivedFrom,omitempty"`
 	Reason               *string  `protobuf:"bytes,3,opt,name=reason" json:"reason,omitempty"`
-	Topics               []string `protobuf:"bytes,4,rep,name=topics" json:"topics,omitempty"`
-	MsgSize              *int64   `protobuf:"varint,5,req,name=msgSize" json:"msgSize,omitempty"`
+	Topic                *string  `protobuf:"bytes,4,opt,name=topic" json:"topic,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -329,7 +347,16 @@ func (m *TraceEvent_RejectMessage) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_RejectMessage.Unmarshal(m, b)
 }
 func (m *TraceEvent_RejectMessage) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_RejectMessage.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_RejectMessage.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_RejectMessage) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_RejectMessage.Merge(m, src)
@@ -364,11 +391,11 @@ func (m *TraceEvent_RejectMessage) GetReason() string {
 	return ""
 }
 
-func (m *TraceEvent_RejectMessage) GetTopics() []string {
-	if m != nil {
-		return m.Topics
+func (m *TraceEvent_RejectMessage) GetTopic() string {
+	if m != nil && m.Topic != nil {
+		return *m.Topic
 	}
-	return nil
+	return ""
 }
 
 func (m *TraceEvent_RejectMessage) GetMsgSize() int64 {
@@ -381,7 +408,7 @@ func (m *TraceEvent_RejectMessage) GetMsgSize() int64 {
 type TraceEvent_DuplicateMessage struct {
 	MessageID            []byte   `protobuf:"bytes,1,opt,name=messageID" json:"messageID,omitempty"`
 	ReceivedFrom         []byte   `protobuf:"bytes,2,opt,name=receivedFrom" json:"receivedFrom,omitempty"`
-	Topics               []string `protobuf:"bytes,3,rep,name=topics" json:"topics,omitempty"`
+	Topic                *string  `protobuf:"bytes,3,opt,name=topic" json:"topic,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -398,7 +425,16 @@ func (m *TraceEvent_DuplicateMessage) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_DuplicateMessage.Unmarshal(m, b)
 }
 func (m *TraceEvent_DuplicateMessage) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_DuplicateMessage.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_DuplicateMessage.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_DuplicateMessage) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_DuplicateMessage.Merge(m, src)
@@ -426,17 +462,17 @@ func (m *TraceEvent_DuplicateMessage) GetReceivedFrom() []byte {
 	return nil
 }
 
-func (m *TraceEvent_DuplicateMessage) GetTopics() []string {
-	if m != nil {
-		return m.Topics
+func (m *TraceEvent_DuplicateMessage) GetTopic() string {
+	if m != nil && m.Topic != nil {
+		return *m.Topic
 	}
-	return nil
+	return ""
 }
 
 type TraceEvent_DeliverMessage struct {
 	MessageID            []byte   `protobuf:"bytes,1,opt,name=messageID" json:"messageID,omitempty"`
-	Topics               []string `protobuf:"bytes,2,rep,name=topics" json:"topics,omitempty"`
-	MsgSize              *int64   `protobuf:"varint,3,req,name=msgSize" json:"msgSize,omitempty"`
+	Topic                *string  `protobuf:"bytes,2,opt,name=topic" json:"topic,omitempty"`
+	ReceivedFrom         []byte   `protobuf:"bytes,3,opt,name=receivedFrom" json:"receivedFrom,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -453,7 +489,16 @@ func (m *TraceEvent_DeliverMessage) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_DeliverMessage.Unmarshal(m, b)
 }
 func (m *TraceEvent_DeliverMessage) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_DeliverMessage.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_DeliverMessage.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_DeliverMessage) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_DeliverMessage.Merge(m, src)
@@ -474,9 +519,16 @@ func (m *TraceEvent_DeliverMessage) GetMessageID() []byte {
 	return nil
 }
 
-func (m *TraceEvent_DeliverMessage) GetTopics() []string {
+func (m *TraceEvent_DeliverMessage) GetTopic() string {
+	if m != nil && m.Topic != nil {
+		return *m.Topic
+	}
+	return ""
+}
+
+func (m *TraceEvent_DeliverMessage) GetReceivedFrom() []byte {
 	if m != nil {
-		return m.Topics
+		return m.ReceivedFrom
 	}
 	return nil
 }
@@ -507,7 +559,16 @@ func (m *TraceEvent_AddPeer) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_AddPeer.Unmarshal(m, b)
 }
 func (m *TraceEvent_AddPeer) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_AddPeer.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_AddPeer.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_AddPeer) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_AddPeer.Merge(m, src)
@@ -553,7 +614,16 @@ func (m *TraceEvent_RemovePeer) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_RemovePeer.Unmarshal(m, b)
 }
 func (m *TraceEvent_RemovePeer) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_RemovePeer.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_RemovePeer.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_RemovePeer) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_RemovePeer.Merge(m, src)
@@ -594,7 +664,16 @@ func (m *TraceEvent_RecvRPC) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_RecvRPC.Unmarshal(m, b)
 }
 func (m *TraceEvent_RecvRPC) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_RecvRPC.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_RecvRPC.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_RecvRPC) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_RecvRPC.Merge(m, src)
@@ -649,7 +728,16 @@ func (m *TraceEvent_SendRPC) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_SendRPC.Unmarshal(m, b)
 }
 func (m *TraceEvent_SendRPC) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_SendRPC.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_SendRPC.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_SendRPC) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_SendRPC.Merge(m, src)
@@ -704,7 +792,16 @@ func (m *TraceEvent_DropRPC) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_DropRPC.Unmarshal(m, b)
 }
 func (m *TraceEvent_DropRPC) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_DropRPC.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_DropRPC.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_DropRPC) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_DropRPC.Merge(m, src)
@@ -757,7 +854,16 @@ func (m *TraceEvent_Join) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_Join.Unmarshal(m, b)
 }
 func (m *TraceEvent_Join) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_Join.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_Join.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_Join) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_Join.Merge(m, src)
@@ -796,7 +902,16 @@ func (m *TraceEvent_Leave) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_Leave.Unmarshal(m, b)
 }
 func (m *TraceEvent_Leave) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_Leave.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_Leave.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_Leave) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_Leave.Merge(m, src)
@@ -836,7 +951,16 @@ func (m *TraceEvent_Graft) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_Graft.Unmarshal(m, b)
 }
 func (m *TraceEvent_Graft) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_Graft.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_Graft.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_Graft) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_Graft.Merge(m, src)
@@ -883,7 +1007,16 @@ func (m *TraceEvent_Prune) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_Prune.Unmarshal(m, b)
 }
 func (m *TraceEvent_Prune) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_Prune.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_Prune.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_Prune) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_Prune.Merge(m, src)
@@ -931,7 +1064,16 @@ func (m *TraceEvent_RPCMeta) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_RPCMeta.Unmarshal(m, b)
 }
 func (m *TraceEvent_RPCMeta) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_RPCMeta.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_RPCMeta.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_RPCMeta) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_RPCMeta.Merge(m, src)
@@ -968,7 +1110,7 @@ func (m *TraceEvent_RPCMeta) GetControl() *TraceEvent_ControlMeta {
 
 type TraceEvent_MessageMeta struct {
 	MessageID            []byte   `protobuf:"bytes,1,opt,name=messageID" json:"messageID,omitempty"`
-	Topics               []string `protobuf:"bytes,2,rep,name=topics" json:"topics,omitempty"`
+	Topic                *string  `protobuf:"bytes,2,opt,name=topic" json:"topic,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -985,7 +1127,16 @@ func (m *TraceEvent_MessageMeta) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_MessageMeta.Unmarshal(m, b)
 }
 func (m *TraceEvent_MessageMeta) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_MessageMeta.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_MessageMeta.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_MessageMeta) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_MessageMeta.Merge(m, src)
@@ -1006,11 +1157,11 @@ func (m *TraceEvent_MessageMeta) GetMessageID() []byte {
 	return nil
 }
 
-func (m *TraceEvent_MessageMeta) GetTopics() []string {
-	if m != nil {
-		return m.Topics
+func (m *TraceEvent_MessageMeta) GetTopic() string {
+	if m != nil && m.Topic != nil {
+		return *m.Topic
 	}
-	return nil
+	return ""
 }
 
 type TraceEvent_SubMeta struct {
@@ -1032,7 +1183,16 @@ func (m *TraceEvent_SubMeta) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_SubMeta.Unmarshal(m, b)
 }
 func (m *TraceEvent_SubMeta) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_SubMeta.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_SubMeta.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_SubMeta) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_SubMeta.Merge(m, src)
@@ -1081,7 +1241,16 @@ func (m *TraceEvent_ControlMeta) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_ControlMeta.Unmarshal(m, b)
 }
 func (m *TraceEvent_ControlMeta) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_ControlMeta.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_ControlMeta.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_ControlMeta) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_ControlMeta.Merge(m, src)
@@ -1142,7 +1311,16 @@ func (m *TraceEvent_ControlIHaveMeta) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_ControlIHaveMeta.Unmarshal(m, b)
 }
 func (m *TraceEvent_ControlIHaveMeta) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_ControlIHaveMeta.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_ControlIHaveMeta.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_ControlIHaveMeta) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_ControlIHaveMeta.Merge(m, src)
@@ -1188,7 +1366,16 @@ func (m *TraceEvent_ControlIWantMeta) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_ControlIWantMeta.Unmarshal(m, b)
 }
 func (m *TraceEvent_ControlIWantMeta) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_ControlIWantMeta.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_ControlIWantMeta.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_ControlIWantMeta) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_ControlIWantMeta.Merge(m, src)
@@ -1227,7 +1414,16 @@ func (m *TraceEvent_ControlGraftMeta) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_ControlGraftMeta.Unmarshal(m, b)
 }
 func (m *TraceEvent_ControlGraftMeta) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_ControlGraftMeta.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_ControlGraftMeta.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_ControlGraftMeta) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_ControlGraftMeta.Merge(m, src)
@@ -1267,7 +1463,16 @@ func (m *TraceEvent_ControlPruneMeta) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEvent_ControlPruneMeta.Unmarshal(m, b)
 }
 func (m *TraceEvent_ControlPruneMeta) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEvent_ControlPruneMeta.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEvent_ControlPruneMeta.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEvent_ControlPruneMeta) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEvent_ControlPruneMeta.Merge(m, src)
@@ -1313,7 +1518,16 @@ func (m *TraceEventBatch) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TraceEventBatch.Unmarshal(m, b)
 }
 func (m *TraceEventBatch) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TraceEventBatch.Marshal(b, m, deterministic)
+	if deterministic {
+		return xxx_messageInfo_TraceEventBatch.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
 }
 func (m *TraceEventBatch) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_TraceEventBatch.Merge(m, src)
@@ -1364,69 +1578,5184 @@ func init() {
 func init() { proto.RegisterFile("trace.proto", fileDescriptor_0571941a1d628a80) }
 
 var fileDescriptor_0571941a1d628a80 = []byte{
-	// 1014 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x96, 0xcd, 0x6e, 0xdb, 0x46,
-	0x10, 0xc7, 0x4b, 0x7d, 0x98, 0xd2, 0x48, 0x96, 0xd9, 0x6d, 0xd3, 0x12, 0x6a, 0x52, 0xa8, 0x6e,
-	0x10, 0x08, 0x28, 0x20, 0x20, 0x06, 0x8a, 0x1c, 0x9a, 0x04, 0x55, 0x44, 0xc6, 0x96, 0x21, 0xdb,
-	0xc4, 0x48, 0x76, 0x8f, 0x2e, 0x25, 0x6d, 0x6d, 0x06, 0x12, 0x49, 0x90, 0x2b, 0x15, 0xc9, 0xbd,
-	0x4f, 0xd1, 0x17, 0xea, 0xad, 0x0f, 0xd1, 0x17, 0x29, 0x76, 0x97, 0xa4, 0x44, 0x99, 0x64, 0xdc,
-	0xc2, 0xc8, 0x8d, 0xb3, 0xfc, 0xff, 0x66, 0x67, 0x67, 0x67, 0x86, 0x84, 0x06, 0x0b, 0xec, 0x19,
-	0xed, 0xf9, 0x81, 0xc7, 0x3c, 0x52, 0xf7, 0x57, 0xd3, 0x70, 0x35, 0xed, 0xf9, 0xd3, 0xc3, 0x7f,
-	0xbe, 0x06, 0x98, 0xf0, 0x57, 0xe6, 0x9a, 0xba, 0x8c, 0xf4, 0xa0, 0xc2, 0xde, 0xfb, 0x54, 0x57,
-	0x3a, 0x4a, 0xb7, 0x75, 0xd4, 0xee, 0x25, 0xc2, 0xde, 0x46, 0xd4, 0x9b, 0xbc, 0xf7, 0x29, 0x0a,
-	0x1d, 0xf9, 0x0a, 0xf6, 0x7c, 0x4a, 0x83, 0xa1, 0xa1, 0x97, 0x3a, 0x4a, 0xb7, 0x89, 0x91, 0x45,
-	0x1e, 0x43, 0x9d, 0x39, 0x4b, 0x1a, 0x32, 0x7b, 0xe9, 0xeb, 0xe5, 0x8e, 0xd2, 0x2d, 0xe3, 0x66,
-	0x81, 0x8c, 0xa0, 0xe5, 0xaf, 0xa6, 0x0b, 0x27, 0xbc, 0x3d, 0xa3, 0x61, 0x68, 0xdf, 0x50, 0xbd,
-	0xd2, 0x51, 0xba, 0x8d, 0xa3, 0xa7, 0xd9, 0xfb, 0x59, 0x29, 0x2d, 0xee, 0xb0, 0x64, 0x08, 0xfb,
-	0x01, 0x7d, 0x47, 0x67, 0x2c, 0x76, 0x56, 0x15, 0xce, 0xbe, 0xcf, 0x76, 0x86, 0xdb, 0x52, 0x4c,
-	0x93, 0x04, 0x41, 0x9b, 0xaf, 0xfc, 0x85, 0x33, 0xb3, 0x19, 0x8d, 0xbd, 0xed, 0x09, 0x6f, 0xcf,
-	0xb2, 0xbd, 0x19, 0x3b, 0x6a, 0xbc, 0xc3, 0xf3, 0xc3, 0xce, 0xe9, 0xc2, 0x59, 0xd3, 0x20, 0xf6,
-	0xa8, 0x16, 0x1d, 0xd6, 0x48, 0x69, 0x71, 0x87, 0x25, 0x2f, 0x40, 0xb5, 0xe7, 0x73, 0x8b, 0xd2,
-	0x40, 0xaf, 0x09, 0x37, 0x4f, 0xb2, 0xdd, 0xf4, 0xa5, 0x08, 0x63, 0x35, 0xf9, 0x19, 0x20, 0xa0,
-	0x4b, 0x6f, 0x4d, 0x05, 0x5b, 0x17, 0x6c, 0x27, 0x2f, 0x45, 0xb1, 0x0e, 0xb7, 0x18, 0xbe, 0x75,
-	0x40, 0x67, 0x6b, 0xb4, 0x06, 0x3a, 0x14, 0x6d, 0x8d, 0x52, 0x84, 0xb1, 0x9a, 0x83, 0x21, 0x75,
-	0xe7, 0x1c, 0x6c, 0x14, 0x81, 0x63, 0x29, 0xc2, 0x58, 0xcd, 0xc1, 0x79, 0xe0, 0xf9, 0x1c, 0x6c,
-	0x16, 0x81, 0x86, 0x14, 0x61, 0xac, 0xe6, 0x65, 0xfc, 0xce, 0x73, 0x5c, 0x7d, 0x5f, 0x50, 0x39,
-	0x65, 0x7c, 0xea, 0x39, 0x2e, 0x0a, 0x1d, 0x79, 0x0e, 0xd5, 0x05, 0xb5, 0xd7, 0x54, 0x6f, 0x09,
-	0xe0, 0x9b, 0x6c, 0x60, 0xc4, 0x25, 0x28, 0x95, 0x1c, 0xb9, 0x09, 0xec, 0xdf, 0x98, 0x7e, 0x50,
-	0x84, 0x1c, 0x73, 0x09, 0x4a, 0x25, 0x47, 0xfc, 0x60, 0xe5, 0x52, 0x5d, 0x2b, 0x42, 0x2c, 0x2e,
-	0x41, 0xa9, 0x6c, 0xff, 0x0a, 0xad, 0x74, 0xf5, 0xf3, 0xce, 0x5a, 0xca, 0xc7, 0xa1, 0x21, 0xda,
-	0xb4, 0x89, 0x9b, 0x05, 0xde, 0x8f, 0xcc, 0xf3, 0x9d, 0x59, 0xa8, 0x97, 0x3a, 0xe5, 0x6e, 0x1d,
-	0x23, 0x8b, 0xe8, 0xa0, 0x2e, 0xc3, 0x9b, 0xb1, 0xf3, 0x81, 0xea, 0xe5, 0x4e, 0xa9, 0x5b, 0xc6,
-	0xd8, 0x6c, 0xff, 0xa9, 0xc0, 0x7e, 0xaa, 0x27, 0x3e, 0xb2, 0xc3, 0x21, 0x34, 0x03, 0x3a, 0xa3,
-	0xce, 0x9a, 0xce, 0xdf, 0x06, 0xde, 0x32, 0xea, 0xfb, 0xd4, 0x1a, 0x8f, 0x22, 0xa0, 0x76, 0xe8,
-	0xb9, 0xa2, 0xf5, 0xeb, 0x18, 0x59, 0x5b, 0xd1, 0x55, 0xf2, 0xa2, 0xab, 0xa6, 0xa3, 0x5b, 0x80,
-	0xb6, 0xdb, 0x62, 0x0f, 0x13, 0x5f, 0x14, 0x47, 0x79, 0x3b, 0x0e, 0x9e, 0xed, 0x74, 0xfb, 0x3d,
-	0x78, 0xb6, 0x5f, 0x80, 0x1a, 0x75, 0xe6, 0xd6, 0xe8, 0x54, 0x52, 0xa3, 0xf3, 0x4b, 0x5e, 0x25,
-	0x1e, 0xf3, 0x44, 0xe4, 0x75, 0x94, 0x46, 0xfb, 0x29, 0xc0, 0xa6, 0x2d, 0xf3, 0xd8, 0xf6, 0x07,
-	0x50, 0xa3, 0xee, 0xbb, 0x93, 0x07, 0x25, 0x23, 0x0f, 0xcf, 0xa1, 0xb2, 0xa4, 0xcc, 0x16, 0x3b,
-	0xe5, 0xb7, 0xb3, 0x35, 0x38, 0xa3, 0xcc, 0x46, 0x21, 0x2d, 0x38, 0x9a, 0x0b, 0x6a, 0xd4, 0xc0,
-	0x3c, 0x3c, 0xde, 0xc2, 0x13, 0x2f, 0x0e, 0x4f, 0x5a, 0x0f, 0xbe, 0x5f, 0xd4, 0xf7, 0x9f, 0x66,
-	0xbf, 0xc7, 0x50, 0xe1, 0x13, 0x83, 0xdf, 0x8f, 0xb8, 0x66, 0xb1, 0x57, 0x1d, 0xa5, 0xd1, 0x7e,
-	0x02, 0x55, 0x31, 0x1e, 0x36, 0xaf, 0x4b, 0xdb, 0xaf, 0x7f, 0x84, 0xaa, 0x18, 0x05, 0x45, 0xb7,
-	0x9e, 0x8d, 0x89, 0x71, 0xf0, 0x1f, 0xb1, 0xbf, 0x14, 0x50, 0xa3, 0x63, 0x91, 0x57, 0x50, 0x8b,
-	0x0a, 0x36, 0xd4, 0x95, 0x4e, 0xb9, 0xdb, 0x38, 0xfa, 0x2e, 0x3b, 0x0f, 0x51, 0xc9, 0x8b, 0x5c,
-	0x24, 0x08, 0xe9, 0x43, 0x33, 0x5c, 0x4d, 0xc3, 0x59, 0xe0, 0xf8, 0xcc, 0xf1, 0x5c, 0x51, 0xe8,
-	0xf9, 0x03, 0x7c, 0x35, 0x15, 0x78, 0x0a, 0x21, 0x3f, 0x81, 0x3a, 0xf3, 0x5c, 0x16, 0x78, 0x0b,
-	0x31, 0x0e, 0x72, 0x03, 0x18, 0x48, 0x91, 0xf0, 0x10, 0x13, 0xed, 0x01, 0x34, 0xb6, 0x02, 0xfb,
-	0x7f, 0xfd, 0xd8, 0x7e, 0x05, 0x6a, 0x14, 0x1a, 0x77, 0x10, 0x05, 0x37, 0x95, 0x7f, 0x39, 0x35,
-	0xdc, 0x2c, 0xe4, 0xa4, 0xf3, 0x8f, 0x12, 0x34, 0xb6, 0x82, 0x23, 0x2f, 0xa1, 0xea, 0xdc, 0xf2,
-	0xaf, 0x85, 0xcc, 0xe7, 0xb3, 0xc2, 0xe3, 0x0c, 0x4f, 0xec, 0xb5, 0x4c, 0xaa, 0x84, 0x04, 0xfd,
-	0xbb, 0xed, 0xb2, 0x28, 0x95, 0x1f, 0xa1, 0x7f, 0xb1, 0x5d, 0x16, 0xd1, 0x1c, 0xe2, 0xb4, 0xfc,
-	0xec, 0x94, 0xef, 0x41, 0x8b, 0x92, 0x93, 0xb4, 0xfc, 0x02, 0xbd, 0x8c, 0xbf, 0x40, 0x95, 0x7b,
-	0xd0, 0xa2, 0xf2, 0x24, 0x2d, 0x3f, 0x46, 0x27, 0xa0, 0xed, 0x1e, 0x2a, 0xbb, 0x1b, 0xc8, 0xb7,
-	0x00, 0xc9, 0xad, 0xc8, 0xcb, 0x68, 0xe2, 0xd6, 0x4a, 0xfb, 0x68, 0xe3, 0x29, 0x3e, 0xe0, 0x0e,
-	0xa3, 0xdc, 0x61, 0xba, 0x09, 0x93, 0x1c, 0x2b, 0xa7, 0x17, 0x5f, 0x27, 0xca, 0xe4, 0x08, 0x39,
-	0x71, 0xf2, 0x59, 0x4b, 0x69, 0x10, 0x87, 0x28, 0x8d, 0xc3, 0xbf, 0x15, 0xa8, 0xf0, 0x7f, 0x5c,
-	0xf2, 0x05, 0x1c, 0x58, 0x97, 0x6f, 0x46, 0xc3, 0xf1, 0xc9, 0xf5, 0x99, 0x39, 0x1e, 0xf7, 0x8f,
-	0x4d, 0xed, 0x33, 0x42, 0xa0, 0x85, 0xe6, 0xa9, 0x39, 0x98, 0x24, 0x6b, 0x0a, 0x79, 0x04, 0x9f,
-	0x1b, 0x97, 0xd6, 0x68, 0x38, 0xe8, 0x4f, 0xcc, 0x64, 0xb9, 0xc4, 0x79, 0xc3, 0x1c, 0x0d, 0xaf,
-	0x4c, 0x4c, 0x16, 0xcb, 0xa4, 0x09, 0xb5, 0xbe, 0x61, 0x5c, 0x5b, 0xa6, 0x89, 0x5a, 0x85, 0x1c,
-	0x40, 0x03, 0xcd, 0xb3, 0x8b, 0x2b, 0x53, 0x2e, 0x54, 0xf9, 0x6b, 0x34, 0x07, 0x57, 0xd7, 0x68,
-	0x0d, 0xb4, 0x3d, 0x6e, 0x8d, 0xcd, 0x73, 0x43, 0x58, 0x2a, 0xb7, 0x0c, 0xbc, 0xb0, 0x84, 0x55,
-	0x23, 0x35, 0xa8, 0x9c, 0x5e, 0x0c, 0xcf, 0xb5, 0x3a, 0xa9, 0x43, 0x75, 0x64, 0xf6, 0xaf, 0x4c,
-	0x0d, 0xf8, 0xe3, 0x31, 0xf6, 0xdf, 0x4e, 0xb4, 0x06, 0x7f, 0xb4, 0xf0, 0xf2, 0xdc, 0xd4, 0x9a,
-	0x87, 0xaf, 0xe1, 0x60, 0x73, 0xbf, 0x6f, 0x6c, 0x36, 0xbb, 0x25, 0x3f, 0x40, 0x75, 0xca, 0x1f,
-	0xa2, 0x22, 0x7e, 0x94, 0x59, 0x0a, 0x28, 0x35, 0xff, 0x06, 0x00, 0x00, 0xff, 0xff, 0xce, 0x47,
-	0x1f, 0x67, 0x3e, 0x0c, 0x00, 0x00,
+	// 999 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x96, 0x51, 0x6f, 0xda, 0x56,
+	0x14, 0xc7, 0xe7, 0x00, 0x01, 0x0e, 0x84, 0x78, 0x77, 0x6d, 0x65, 0xb1, 0x36, 0x62, 0x59, 0x55,
+	0x21, 0x4d, 0x42, 0x6a, 0xa4, 0xa9, 0x0f, 0x6b, 0xab, 0x11, 0xec, 0x26, 0x44, 0x24, 0xb1, 0x0e,
+	0x24, 0x7b, 0xcc, 0x0c, 0xdc, 0x35, 0x8e, 0xc0, 0xb6, 0xec, 0x0b, 0x53, 0x9f, 0xf6, 0xb4, 0xef,
+	0xd6, 0xb7, 0xed, 0x23, 0x54, 0xf9, 0x24, 0xd3, 0xbd, 0xd7, 0x36, 0x36, 0xd8, 0xb4, 0x8b, 0xfa,
+	0xe6, 0x73, 0xf3, 0xff, 0x9d, 0x7b, 0xce, 0xbd, 0xe7, 0x7f, 0x03, 0xd4, 0x98, 0x6f, 0x4d, 0x68,
+	0xc7, 0xf3, 0x5d, 0xe6, 0x92, 0xaa, 0xb7, 0x18, 0x07, 0x8b, 0x71, 0xc7, 0x1b, 0x1f, 0x7e, 0x7a,
+	0x02, 0x30, 0xe2, 0x7f, 0x32, 0x96, 0xd4, 0x61, 0xa4, 0x03, 0x45, 0xf6, 0xc1, 0xa3, 0x9a, 0xd2,
+	0x52, 0xda, 0x8d, 0xa3, 0x66, 0x27, 0x16, 0x76, 0x56, 0xa2, 0xce, 0xe8, 0x83, 0x47, 0x51, 0xe8,
+	0xc8, 0x13, 0xd8, 0xf5, 0x28, 0xf5, 0xfb, 0xba, 0xb6, 0xd3, 0x52, 0xda, 0x75, 0x0c, 0x23, 0xf2,
+	0x14, 0xaa, 0xcc, 0x9e, 0xd3, 0x80, 0x59, 0x73, 0x4f, 0x2b, 0xb4, 0x94, 0x76, 0x01, 0x57, 0x0b,
+	0x64, 0x00, 0x0d, 0x6f, 0x31, 0x9e, 0xd9, 0xc1, 0xed, 0x39, 0x0d, 0x02, 0xeb, 0x3d, 0xd5, 0x8a,
+	0x2d, 0xa5, 0x5d, 0x3b, 0x7a, 0x9e, 0xbd, 0x9f, 0x99, 0xd2, 0xe2, 0x1a, 0x4b, 0xfa, 0xb0, 0xe7,
+	0xd3, 0x3b, 0x3a, 0x61, 0x51, 0xb2, 0x92, 0x48, 0xf6, 0x63, 0x76, 0x32, 0x4c, 0x4a, 0x31, 0x4d,
+	0x12, 0x04, 0x75, 0xba, 0xf0, 0x66, 0xf6, 0xc4, 0x62, 0x34, 0xca, 0xb6, 0x2b, 0xb2, 0xbd, 0xc8,
+	0xce, 0xa6, 0xaf, 0xa9, 0x71, 0x83, 0xe7, 0xcd, 0x4e, 0xe9, 0xcc, 0x5e, 0x52, 0x3f, 0xca, 0x58,
+	0xde, 0xd6, 0xac, 0x9e, 0xd2, 0xe2, 0x1a, 0x4b, 0x5e, 0x41, 0xd9, 0x9a, 0x4e, 0x4d, 0x4a, 0x7d,
+	0xad, 0x22, 0xd2, 0x3c, 0xcb, 0x4e, 0xd3, 0x95, 0x22, 0x8c, 0xd4, 0xe4, 0x57, 0x00, 0x9f, 0xce,
+	0xdd, 0x25, 0x15, 0x6c, 0x55, 0xb0, 0xad, 0xbc, 0x23, 0x8a, 0x74, 0x98, 0x60, 0xf8, 0xd6, 0x3e,
+	0x9d, 0x2c, 0xd1, 0xec, 0x69, 0xb0, 0x6d, 0x6b, 0x94, 0x22, 0x8c, 0xd4, 0x1c, 0x0c, 0xa8, 0x33,
+	0xe5, 0x60, 0x6d, 0x1b, 0x38, 0x94, 0x22, 0x8c, 0xd4, 0x1c, 0x9c, 0xfa, 0xae, 0xc7, 0xc1, 0xfa,
+	0x36, 0x50, 0x97, 0x22, 0x8c, 0xd4, 0x7c, 0x8c, 0xef, 0x5c, 0xdb, 0xd1, 0xf6, 0x04, 0x95, 0x33,
+	0xc6, 0x67, 0xae, 0xed, 0xa0, 0xd0, 0x91, 0x97, 0x50, 0x9a, 0x51, 0x6b, 0x49, 0xb5, 0x86, 0x00,
+	0xbe, 0xcf, 0x06, 0x06, 0x5c, 0x82, 0x52, 0xc9, 0x91, 0xf7, 0xbe, 0xf5, 0x07, 0xd3, 0xf6, 0xb7,
+	0x21, 0x27, 0x5c, 0x82, 0x52, 0xc9, 0x11, 0xcf, 0x5f, 0x38, 0x54, 0x53, 0xb7, 0x21, 0x26, 0x97,
+	0xa0, 0x54, 0x36, 0x75, 0x68, 0xa4, 0xa7, 0x9f, 0x3b, 0x6b, 0x2e, 0x3f, 0xfb, 0xba, 0xb0, 0x69,
+	0x1d, 0x57, 0x0b, 0xe4, 0x11, 0x94, 0x98, 0xeb, 0xd9, 0x13, 0x61, 0xc7, 0x2a, 0xca, 0xa0, 0xf9,
+	0x17, 0xec, 0xa5, 0xc6, 0xfe, 0x33, 0x49, 0x0e, 0xa1, 0xee, 0xd3, 0x09, 0xb5, 0x97, 0x74, 0xfa,
+	0xce, 0x77, 0xe7, 0xa1, 0xb5, 0x53, 0x6b, 0xdc, 0xf8, 0x3e, 0xb5, 0x02, 0xd7, 0x11, 0xee, 0xae,
+	0x62, 0x18, 0xad, 0x0a, 0x28, 0x26, 0x0b, 0xb8, 0x03, 0x75, 0xdd, 0x29, 0x5f, 0xa1, 0x86, 0x78,
+	0xaf, 0x42, 0x72, 0xaf, 0x5b, 0x68, 0xa4, 0x3d, 0xf4, 0x90, 0x23, 0xdb, 0xd8, 0xbf, 0xb0, 0xb9,
+	0x7f, 0xf3, 0x15, 0x94, 0x43, 0x9b, 0x25, 0xde, 0x41, 0x25, 0xf5, 0x0e, 0x3e, 0xe2, 0x57, 0xee,
+	0x32, 0x37, 0x4a, 0x2e, 0x82, 0xe6, 0x73, 0x80, 0x95, 0xc7, 0xf2, 0xd8, 0xe6, 0xef, 0x50, 0x0e,
+	0xad, 0xb4, 0x51, 0x8d, 0x92, 0x71, 0x1a, 0x2f, 0xa1, 0x38, 0xa7, 0xcc, 0x12, 0x3b, 0xe5, 0x7b,
+	0xd3, 0xec, 0x9d, 0x53, 0x66, 0xa1, 0x90, 0x36, 0x47, 0x50, 0x0e, 0x3d, 0xc7, 0x8b, 0xe0, 0xae,
+	0x1b, 0xb9, 0x51, 0x11, 0x32, 0x7a, 0x60, 0xd6, 0xd0, 0x90, 0x5f, 0x33, 0xeb, 0x53, 0x28, 0x72,
+	0xc3, 0xae, 0xae, 0x4b, 0x49, 0x5e, 0xfa, 0x33, 0x28, 0x09, 0x77, 0xe6, 0x18, 0xe0, 0x67, 0x28,
+	0x09, 0x27, 0x6e, 0xbb, 0xa7, 0x6c, 0x4c, 0xb8, 0xf1, 0x7f, 0x62, 0x1f, 0x15, 0x28, 0x87, 0xc5,
+	0x93, 0x37, 0x50, 0x09, 0x47, 0x2d, 0xd0, 0x94, 0x56, 0xa1, 0x5d, 0x3b, 0xfa, 0x21, 0xbb, 0xdb,
+	0x70, 0x58, 0x45, 0xc7, 0x31, 0x42, 0xba, 0x50, 0x0f, 0x16, 0xe3, 0x60, 0xe2, 0xdb, 0x1e, 0xb3,
+	0x5d, 0x47, 0xdb, 0x11, 0x29, 0xf2, 0xde, 0xcf, 0xc5, 0x58, 0xe0, 0x29, 0x84, 0xfc, 0x02, 0xe5,
+	0x89, 0xeb, 0x30, 0xdf, 0x9d, 0x89, 0x21, 0xce, 0x2d, 0xa0, 0x27, 0x45, 0x22, 0x43, 0x44, 0x34,
+	0xbb, 0x50, 0x4b, 0x14, 0xf6, 0xa0, 0xc7, 0xe7, 0x0d, 0x94, 0xc3, 0xc2, 0x38, 0x1e, 0x96, 0x36,
+	0x96, 0x3f, 0x31, 0x2a, 0xb8, 0x5a, 0xc8, 0xc1, 0xff, 0xde, 0x81, 0x5a, 0xa2, 0x34, 0xf2, 0x1a,
+	0x4a, 0xf6, 0x2d, 0x7f, 0xaa, 0xe5, 0x69, 0xbe, 0xd8, 0xda, 0x4c, 0xff, 0xd4, 0x5a, 0xca, 0x23,
+	0x95, 0x90, 0xa0, 0xff, 0xb4, 0x1c, 0x16, 0x1e, 0xe4, 0x67, 0xe8, 0xdf, 0x2c, 0x87, 0x85, 0x34,
+	0x87, 0x38, 0x2d, 0xdf, 0xfc, 0xc2, 0x17, 0xd0, 0x62, 0xe0, 0x24, 0x2d, 0x9f, 0xff, 0xd7, 0xd1,
+	0xf3, 0x5f, 0xfc, 0x02, 0x5a, 0xcc, 0x9d, 0xa4, 0xe5, 0x7f, 0x82, 0x53, 0x50, 0xd7, 0x9b, 0xca,
+	0xf6, 0x02, 0x39, 0x00, 0x88, 0xef, 0x24, 0x10, 0x8d, 0xd6, 0x31, 0xb1, 0xd2, 0x3c, 0x5a, 0x65,
+	0x8a, 0x1a, 0x5c, 0x63, 0x94, 0x0d, 0xa6, 0x1d, 0x33, 0x71, 0x5b, 0x39, 0x4e, 0x7c, 0x1b, 0x2b,
+	0xe3, 0x16, 0x72, 0xea, 0xe4, 0x6f, 0x23, 0xa5, 0x7e, 0x54, 0xa2, 0x0c, 0x0e, 0xff, 0x51, 0xa0,
+	0xc8, 0x7f, 0x60, 0x92, 0xef, 0x60, 0xdf, 0xbc, 0x3a, 0x1e, 0xf4, 0x87, 0xa7, 0x37, 0xe7, 0xc6,
+	0x70, 0xd8, 0x3d, 0x31, 0xd4, 0x6f, 0x08, 0x81, 0x06, 0x1a, 0x67, 0x46, 0x6f, 0x14, 0xaf, 0x29,
+	0xe4, 0x31, 0x7c, 0xab, 0x5f, 0x99, 0x83, 0x7e, 0xaf, 0x3b, 0x32, 0xe2, 0xe5, 0x1d, 0xce, 0xeb,
+	0xc6, 0xa0, 0x7f, 0x6d, 0x60, 0xbc, 0x58, 0x20, 0x75, 0xa8, 0x74, 0x75, 0xfd, 0xc6, 0x34, 0x0c,
+	0x54, 0x8b, 0x64, 0x1f, 0x6a, 0x68, 0x9c, 0x5f, 0x5e, 0x1b, 0x72, 0xa1, 0xc4, 0xff, 0x8c, 0x46,
+	0xef, 0xfa, 0x06, 0xcd, 0x9e, 0xba, 0xcb, 0xa3, 0xa1, 0x71, 0xa1, 0x8b, 0xa8, 0xcc, 0x23, 0x1d,
+	0x2f, 0x4d, 0x11, 0x55, 0x48, 0x05, 0x8a, 0x67, 0x97, 0xfd, 0x0b, 0xb5, 0x4a, 0xaa, 0x50, 0x1a,
+	0x18, 0xdd, 0x6b, 0x43, 0x05, 0xfe, 0x79, 0x82, 0xdd, 0x77, 0x23, 0xb5, 0xc6, 0x3f, 0x4d, 0xbc,
+	0xba, 0x30, 0xd4, 0xfa, 0xe1, 0x5b, 0xd8, 0x5f, 0xdd, 0xef, 0xb1, 0xc5, 0x26, 0xb7, 0xe4, 0x27,
+	0x28, 0x8d, 0xf9, 0x47, 0x38, 0xc4, 0x8f, 0x33, 0x47, 0x01, 0xa5, 0xe6, 0xb8, 0xfe, 0xf1, 0xfe,
+	0x40, 0xf9, 0xf7, 0xfe, 0x40, 0xf9, 0x74, 0x7f, 0xa0, 0xfc, 0x17, 0x00, 0x00, 0xff, 0xff, 0xdb,
+	0x3a, 0x1c, 0xe4, 0xc9, 0x0b, 0x00, 0x00,
 }
+
+func (m *TraceEvent) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Prune != nil {
+		{
+			size, err := m.Prune.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTrace(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x82
+	}
+	if m.Graft != nil {
+		{
+			size, err := m.Graft.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTrace(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x7a
+	}
+	if m.Leave != nil {
+		{
+			size, err := m.Leave.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTrace(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x72
+	}
+	if m.Join != nil {
+		{
+			size, err := m.Join.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTrace(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6a
+	}
+	if m.DropRPC != nil {
+		{
+			size, err := m.DropRPC.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTrace(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x62
+	}
+	if m.SendRPC != nil {
+		{
+			size, err := m.SendRPC.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTrace(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x5a
+	}
+	if m.RecvRPC != nil {
+		{
+			size, err := m.RecvRPC.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTrace(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x52
+	}
+	if m.RemovePeer != nil {
+		{
+			size, err := m.RemovePeer.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTrace(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x4a
+	}
+	if m.AddPeer != nil {
+		{
+			size, err := m.AddPeer.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTrace(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x42
+	}
+	if m.DeliverMessage != nil {
+		{
+			size, err := m.DeliverMessage.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTrace(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x3a
+	}
+	if m.DuplicateMessage != nil {
+		{
+			size, err := m.DuplicateMessage.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTrace(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x32
+	}
+	if m.RejectMessage != nil {
+		{
+			size, err := m.RejectMessage.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTrace(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2a
+	}
+	if m.PublishMessage != nil {
+		{
+			size, err := m.PublishMessage.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTrace(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.Timestamp != nil {
+		i = encodeVarintTrace(dAtA, i, uint64(*m.Timestamp))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.PeerID != nil {
+		i -= len(m.PeerID)
+		copy(dAtA[i:], m.PeerID)
+		i = encodeVarintTrace(dAtA, i, uint64(len(m.PeerID)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.Type != nil {
+		i = encodeVarintTrace(dAtA, i, uint64(*m.Type))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_PublishMessage) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_PublishMessage) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_PublishMessage) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Topic != nil {
+		i -= len(*m.Topic)
+		copy(dAtA[i:], *m.Topic)
+		i = encodeVarintTrace(dAtA, i, uint64(len(*m.Topic)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.MessageID != nil {
+		i -= len(m.MessageID)
+		copy(dAtA[i:], m.MessageID)
+		i = encodeVarintTrace(dAtA, i, uint64(len(m.MessageID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_RejectMessage) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_RejectMessage) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_RejectMessage) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Topic != nil {
+		i -= len(*m.Topic)
+		copy(dAtA[i:], *m.Topic)
+		i = encodeVarintTrace(dAtA, i, uint64(len(*m.Topic)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.Reason != nil {
+		i -= len(*m.Reason)
+		copy(dAtA[i:], *m.Reason)
+		i = encodeVarintTrace(dAtA, i, uint64(len(*m.Reason)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.ReceivedFrom != nil {
+		i -= len(m.ReceivedFrom)
+		copy(dAtA[i:], m.ReceivedFrom)
+		i = encodeVarintTrace(dAtA, i, uint64(len(m.ReceivedFrom)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.MessageID != nil {
+		i -= len(m.MessageID)
+		copy(dAtA[i:], m.MessageID)
+		i = encodeVarintTrace(dAtA, i, uint64(len(m.MessageID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_DuplicateMessage) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_DuplicateMessage) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_DuplicateMessage) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Topic != nil {
+		i -= len(*m.Topic)
+		copy(dAtA[i:], *m.Topic)
+		i = encodeVarintTrace(dAtA, i, uint64(len(*m.Topic)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.ReceivedFrom != nil {
+		i -= len(m.ReceivedFrom)
+		copy(dAtA[i:], m.ReceivedFrom)
+		i = encodeVarintTrace(dAtA, i, uint64(len(m.ReceivedFrom)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.MessageID != nil {
+		i -= len(m.MessageID)
+		copy(dAtA[i:], m.MessageID)
+		i = encodeVarintTrace(dAtA, i, uint64(len(m.MessageID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_DeliverMessage) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_DeliverMessage) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_DeliverMessage) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.ReceivedFrom != nil {
+		i -= len(m.ReceivedFrom)
+		copy(dAtA[i:], m.ReceivedFrom)
+		i = encodeVarintTrace(dAtA, i, uint64(len(m.ReceivedFrom)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.Topic != nil {
+		i -= len(*m.Topic)
+		copy(dAtA[i:], *m.Topic)
+		i = encodeVarintTrace(dAtA, i, uint64(len(*m.Topic)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.MessageID != nil {
+		i -= len(m.MessageID)
+		copy(dAtA[i:], m.MessageID)
+		i = encodeVarintTrace(dAtA, i, uint64(len(m.MessageID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_AddPeer) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_AddPeer) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_AddPeer) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Proto != nil {
+		i -= len(*m.Proto)
+		copy(dAtA[i:], *m.Proto)
+		i = encodeVarintTrace(dAtA, i, uint64(len(*m.Proto)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.PeerID != nil {
+		i -= len(m.PeerID)
+		copy(dAtA[i:], m.PeerID)
+		i = encodeVarintTrace(dAtA, i, uint64(len(m.PeerID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_RemovePeer) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_RemovePeer) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_RemovePeer) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.PeerID != nil {
+		i -= len(m.PeerID)
+		copy(dAtA[i:], m.PeerID)
+		i = encodeVarintTrace(dAtA, i, uint64(len(m.PeerID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_RecvRPC) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_RecvRPC) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_RecvRPC) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Meta != nil {
+		{
+			size, err := m.Meta.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTrace(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.ReceivedFrom != nil {
+		i -= len(m.ReceivedFrom)
+		copy(dAtA[i:], m.ReceivedFrom)
+		i = encodeVarintTrace(dAtA, i, uint64(len(m.ReceivedFrom)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_SendRPC) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_SendRPC) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_SendRPC) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Meta != nil {
+		{
+			size, err := m.Meta.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTrace(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.SendTo != nil {
+		i -= len(m.SendTo)
+		copy(dAtA[i:], m.SendTo)
+		i = encodeVarintTrace(dAtA, i, uint64(len(m.SendTo)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_DropRPC) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_DropRPC) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_DropRPC) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Meta != nil {
+		{
+			size, err := m.Meta.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTrace(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.SendTo != nil {
+		i -= len(m.SendTo)
+		copy(dAtA[i:], m.SendTo)
+		i = encodeVarintTrace(dAtA, i, uint64(len(m.SendTo)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_Join) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_Join) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_Join) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Topic != nil {
+		i -= len(*m.Topic)
+		copy(dAtA[i:], *m.Topic)
+		i = encodeVarintTrace(dAtA, i, uint64(len(*m.Topic)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_Leave) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_Leave) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_Leave) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Topic != nil {
+		i -= len(*m.Topic)
+		copy(dAtA[i:], *m.Topic)
+		i = encodeVarintTrace(dAtA, i, uint64(len(*m.Topic)))
+		i--
+		dAtA[i] = 0x12
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_Graft) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_Graft) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_Graft) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Topic != nil {
+		i -= len(*m.Topic)
+		copy(dAtA[i:], *m.Topic)
+		i = encodeVarintTrace(dAtA, i, uint64(len(*m.Topic)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.PeerID != nil {
+		i -= len(m.PeerID)
+		copy(dAtA[i:], m.PeerID)
+		i = encodeVarintTrace(dAtA, i, uint64(len(m.PeerID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_Prune) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_Prune) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_Prune) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Topic != nil {
+		i -= len(*m.Topic)
+		copy(dAtA[i:], *m.Topic)
+		i = encodeVarintTrace(dAtA, i, uint64(len(*m.Topic)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.PeerID != nil {
+		i -= len(m.PeerID)
+		copy(dAtA[i:], m.PeerID)
+		i = encodeVarintTrace(dAtA, i, uint64(len(m.PeerID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_RPCMeta) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_RPCMeta) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_RPCMeta) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Control != nil {
+		{
+			size, err := m.Control.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTrace(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Subscription) > 0 {
+		for iNdEx := len(m.Subscription) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Subscription[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTrace(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if len(m.Messages) > 0 {
+		for iNdEx := len(m.Messages) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Messages[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTrace(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_MessageMeta) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_MessageMeta) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_MessageMeta) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Topic != nil {
+		i -= len(*m.Topic)
+		copy(dAtA[i:], *m.Topic)
+		i = encodeVarintTrace(dAtA, i, uint64(len(*m.Topic)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.MessageID != nil {
+		i -= len(m.MessageID)
+		copy(dAtA[i:], m.MessageID)
+		i = encodeVarintTrace(dAtA, i, uint64(len(m.MessageID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_SubMeta) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_SubMeta) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_SubMeta) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Topic != nil {
+		i -= len(*m.Topic)
+		copy(dAtA[i:], *m.Topic)
+		i = encodeVarintTrace(dAtA, i, uint64(len(*m.Topic)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.Subscribe != nil {
+		i--
+		if *m.Subscribe {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_ControlMeta) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_ControlMeta) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_ControlMeta) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if len(m.Prune) > 0 {
+		for iNdEx := len(m.Prune) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Prune[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTrace(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x22
+		}
+	}
+	if len(m.Graft) > 0 {
+		for iNdEx := len(m.Graft) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Graft[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTrace(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if len(m.Iwant) > 0 {
+		for iNdEx := len(m.Iwant) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Iwant[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTrace(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if len(m.Ihave) > 0 {
+		for iNdEx := len(m.Ihave) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Ihave[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTrace(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_ControlIHaveMeta) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_ControlIHaveMeta) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_ControlIHaveMeta) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if len(m.MessageIDs) > 0 {
+		for iNdEx := len(m.MessageIDs) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.MessageIDs[iNdEx])
+			copy(dAtA[i:], m.MessageIDs[iNdEx])
+			i = encodeVarintTrace(dAtA, i, uint64(len(m.MessageIDs[iNdEx])))
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if m.Topic != nil {
+		i -= len(*m.Topic)
+		copy(dAtA[i:], *m.Topic)
+		i = encodeVarintTrace(dAtA, i, uint64(len(*m.Topic)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_ControlIWantMeta) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_ControlIWantMeta) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_ControlIWantMeta) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if len(m.MessageIDs) > 0 {
+		for iNdEx := len(m.MessageIDs) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.MessageIDs[iNdEx])
+			copy(dAtA[i:], m.MessageIDs[iNdEx])
+			i = encodeVarintTrace(dAtA, i, uint64(len(m.MessageIDs[iNdEx])))
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_ControlGraftMeta) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_ControlGraftMeta) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_ControlGraftMeta) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Topic != nil {
+		i -= len(*m.Topic)
+		copy(dAtA[i:], *m.Topic)
+		i = encodeVarintTrace(dAtA, i, uint64(len(*m.Topic)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEvent_ControlPruneMeta) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEvent_ControlPruneMeta) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEvent_ControlPruneMeta) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if len(m.Peers) > 0 {
+		for iNdEx := len(m.Peers) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Peers[iNdEx])
+			copy(dAtA[i:], m.Peers[iNdEx])
+			i = encodeVarintTrace(dAtA, i, uint64(len(m.Peers[iNdEx])))
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if m.Topic != nil {
+		i -= len(*m.Topic)
+		copy(dAtA[i:], *m.Topic)
+		i = encodeVarintTrace(dAtA, i, uint64(len(*m.Topic)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TraceEventBatch) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceEventBatch) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TraceEventBatch) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if len(m.Batch) > 0 {
+		for iNdEx := len(m.Batch) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Batch[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTrace(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func encodeVarintTrace(dAtA []byte, offset int, v uint64) int {
+	offset -= sovTrace(v)
+	base := offset
+	for v >= 1<<7 {
+		dAtA[offset] = uint8(v&0x7f | 0x80)
+		v >>= 7
+		offset++
+	}
+	dAtA[offset] = uint8(v)
+	return base
+}
+func (m *TraceEvent) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Type != nil {
+		n += 1 + sovTrace(uint64(*m.Type))
+	}
+	if m.PeerID != nil {
+		l = len(m.PeerID)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.Timestamp != nil {
+		n += 1 + sovTrace(uint64(*m.Timestamp))
+	}
+	if m.PublishMessage != nil {
+		l = m.PublishMessage.Size()
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.RejectMessage != nil {
+		l = m.RejectMessage.Size()
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.DuplicateMessage != nil {
+		l = m.DuplicateMessage.Size()
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.DeliverMessage != nil {
+		l = m.DeliverMessage.Size()
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.AddPeer != nil {
+		l = m.AddPeer.Size()
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.RemovePeer != nil {
+		l = m.RemovePeer.Size()
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.RecvRPC != nil {
+		l = m.RecvRPC.Size()
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.SendRPC != nil {
+		l = m.SendRPC.Size()
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.DropRPC != nil {
+		l = m.DropRPC.Size()
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.Join != nil {
+		l = m.Join.Size()
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.Leave != nil {
+		l = m.Leave.Size()
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.Graft != nil {
+		l = m.Graft.Size()
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.Prune != nil {
+		l = m.Prune.Size()
+		n += 2 + l + sovTrace(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_PublishMessage) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.MessageID != nil {
+		l = len(m.MessageID)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.Topic != nil {
+		l = len(*m.Topic)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_RejectMessage) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.MessageID != nil {
+		l = len(m.MessageID)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.ReceivedFrom != nil {
+		l = len(m.ReceivedFrom)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.Reason != nil {
+		l = len(*m.Reason)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.Topic != nil {
+		l = len(*m.Topic)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_DuplicateMessage) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.MessageID != nil {
+		l = len(m.MessageID)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.ReceivedFrom != nil {
+		l = len(m.ReceivedFrom)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.Topic != nil {
+		l = len(*m.Topic)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_DeliverMessage) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.MessageID != nil {
+		l = len(m.MessageID)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.Topic != nil {
+		l = len(*m.Topic)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.ReceivedFrom != nil {
+		l = len(m.ReceivedFrom)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_AddPeer) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.PeerID != nil {
+		l = len(m.PeerID)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.Proto != nil {
+		l = len(*m.Proto)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_RemovePeer) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.PeerID != nil {
+		l = len(m.PeerID)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_RecvRPC) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ReceivedFrom != nil {
+		l = len(m.ReceivedFrom)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.Meta != nil {
+		l = m.Meta.Size()
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_SendRPC) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.SendTo != nil {
+		l = len(m.SendTo)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.Meta != nil {
+		l = m.Meta.Size()
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_DropRPC) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.SendTo != nil {
+		l = len(m.SendTo)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.Meta != nil {
+		l = m.Meta.Size()
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_Join) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Topic != nil {
+		l = len(*m.Topic)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_Leave) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Topic != nil {
+		l = len(*m.Topic)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_Graft) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.PeerID != nil {
+		l = len(m.PeerID)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.Topic != nil {
+		l = len(*m.Topic)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_Prune) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.PeerID != nil {
+		l = len(m.PeerID)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.Topic != nil {
+		l = len(*m.Topic)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_RPCMeta) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Messages) > 0 {
+		for _, e := range m.Messages {
+			l = e.Size()
+			n += 1 + l + sovTrace(uint64(l))
+		}
+	}
+	if len(m.Subscription) > 0 {
+		for _, e := range m.Subscription {
+			l = e.Size()
+			n += 1 + l + sovTrace(uint64(l))
+		}
+	}
+	if m.Control != nil {
+		l = m.Control.Size()
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_MessageMeta) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.MessageID != nil {
+		l = len(m.MessageID)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.Topic != nil {
+		l = len(*m.Topic)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_SubMeta) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Subscribe != nil {
+		n += 2
+	}
+	if m.Topic != nil {
+		l = len(*m.Topic)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_ControlMeta) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Ihave) > 0 {
+		for _, e := range m.Ihave {
+			l = e.Size()
+			n += 1 + l + sovTrace(uint64(l))
+		}
+	}
+	if len(m.Iwant) > 0 {
+		for _, e := range m.Iwant {
+			l = e.Size()
+			n += 1 + l + sovTrace(uint64(l))
+		}
+	}
+	if len(m.Graft) > 0 {
+		for _, e := range m.Graft {
+			l = e.Size()
+			n += 1 + l + sovTrace(uint64(l))
+		}
+	}
+	if len(m.Prune) > 0 {
+		for _, e := range m.Prune {
+			l = e.Size()
+			n += 1 + l + sovTrace(uint64(l))
+		}
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_ControlIHaveMeta) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Topic != nil {
+		l = len(*m.Topic)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if len(m.MessageIDs) > 0 {
+		for _, b := range m.MessageIDs {
+			l = len(b)
+			n += 1 + l + sovTrace(uint64(l))
+		}
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_ControlIWantMeta) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.MessageIDs) > 0 {
+		for _, b := range m.MessageIDs {
+			l = len(b)
+			n += 1 + l + sovTrace(uint64(l))
+		}
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_ControlGraftMeta) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Topic != nil {
+		l = len(*m.Topic)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEvent_ControlPruneMeta) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Topic != nil {
+		l = len(*m.Topic)
+		n += 1 + l + sovTrace(uint64(l))
+	}
+	if len(m.Peers) > 0 {
+		for _, b := range m.Peers {
+			l = len(b)
+			n += 1 + l + sovTrace(uint64(l))
+		}
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *TraceEventBatch) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Batch) > 0 {
+		for _, e := range m.Batch {
+			l = e.Size()
+			n += 1 + l + sovTrace(uint64(l))
+		}
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func sovTrace(x uint64) (n int) {
+	return (math_bits.Len64(x|1) + 6) / 7
+}
+func sozTrace(x uint64) (n int) {
+	return sovTrace(uint64((x << 1) ^ uint64((int64(x) >> 63))))
+}
+func (m *TraceEvent) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: TraceEvent: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: TraceEvent: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Type", wireType)
+			}
+			var v TraceEvent_Type
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= TraceEvent_Type(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Type = &v
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PeerID", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PeerID = append(m.PeerID[:0], dAtA[iNdEx:postIndex]...)
+			if m.PeerID == nil {
+				m.PeerID = []byte{}
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Timestamp", wireType)
+			}
+			var v int64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Timestamp = &v
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PublishMessage", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.PublishMessage == nil {
+				m.PublishMessage = &TraceEvent_PublishMessage{}
+			}
+			if err := m.PublishMessage.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RejectMessage", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.RejectMessage == nil {
+				m.RejectMessage = &TraceEvent_RejectMessage{}
+			}
+			if err := m.RejectMessage.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DuplicateMessage", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.DuplicateMessage == nil {
+				m.DuplicateMessage = &TraceEvent_DuplicateMessage{}
+			}
+			if err := m.DuplicateMessage.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DeliverMessage", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.DeliverMessage == nil {
+				m.DeliverMessage = &TraceEvent_DeliverMessage{}
+			}
+			if err := m.DeliverMessage.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AddPeer", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.AddPeer == nil {
+				m.AddPeer = &TraceEvent_AddPeer{}
+			}
+			if err := m.AddPeer.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RemovePeer", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.RemovePeer == nil {
+				m.RemovePeer = &TraceEvent_RemovePeer{}
+			}
+			if err := m.RemovePeer.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 10:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RecvRPC", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.RecvRPC == nil {
+				m.RecvRPC = &TraceEvent_RecvRPC{}
+			}
+			if err := m.RecvRPC.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 11:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SendRPC", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.SendRPC == nil {
+				m.SendRPC = &TraceEvent_SendRPC{}
+			}
+			if err := m.SendRPC.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 12:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DropRPC", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.DropRPC == nil {
+				m.DropRPC = &TraceEvent_DropRPC{}
+			}
+			if err := m.DropRPC.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 13:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Join", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Join == nil {
+				m.Join = &TraceEvent_Join{}
+			}
+			if err := m.Join.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 14:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Leave", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Leave == nil {
+				m.Leave = &TraceEvent_Leave{}
+			}
+			if err := m.Leave.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 15:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Graft", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Graft == nil {
+				m.Graft = &TraceEvent_Graft{}
+			}
+			if err := m.Graft.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 16:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Prune", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Prune == nil {
+				m.Prune = &TraceEvent_Prune{}
+			}
+			if err := m.Prune.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_PublishMessage) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: PublishMessage: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: PublishMessage: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MessageID", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.MessageID = append(m.MessageID[:0], dAtA[iNdEx:postIndex]...)
+			if m.MessageID == nil {
+				m.MessageID = []byte{}
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Topic", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			s := string(dAtA[iNdEx:postIndex])
+			m.Topic = &s
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_RejectMessage) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: RejectMessage: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: RejectMessage: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MessageID", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.MessageID = append(m.MessageID[:0], dAtA[iNdEx:postIndex]...)
+			if m.MessageID == nil {
+				m.MessageID = []byte{}
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReceivedFrom", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ReceivedFrom = append(m.ReceivedFrom[:0], dAtA[iNdEx:postIndex]...)
+			if m.ReceivedFrom == nil {
+				m.ReceivedFrom = []byte{}
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Reason", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			s := string(dAtA[iNdEx:postIndex])
+			m.Reason = &s
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Topic", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			s := string(dAtA[iNdEx:postIndex])
+			m.Topic = &s
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_DuplicateMessage) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DuplicateMessage: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DuplicateMessage: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MessageID", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.MessageID = append(m.MessageID[:0], dAtA[iNdEx:postIndex]...)
+			if m.MessageID == nil {
+				m.MessageID = []byte{}
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReceivedFrom", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ReceivedFrom = append(m.ReceivedFrom[:0], dAtA[iNdEx:postIndex]...)
+			if m.ReceivedFrom == nil {
+				m.ReceivedFrom = []byte{}
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Topic", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			s := string(dAtA[iNdEx:postIndex])
+			m.Topic = &s
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_DeliverMessage) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DeliverMessage: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DeliverMessage: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MessageID", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.MessageID = append(m.MessageID[:0], dAtA[iNdEx:postIndex]...)
+			if m.MessageID == nil {
+				m.MessageID = []byte{}
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Topic", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			s := string(dAtA[iNdEx:postIndex])
+			m.Topic = &s
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReceivedFrom", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ReceivedFrom = append(m.ReceivedFrom[:0], dAtA[iNdEx:postIndex]...)
+			if m.ReceivedFrom == nil {
+				m.ReceivedFrom = []byte{}
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_AddPeer) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: AddPeer: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: AddPeer: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PeerID", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PeerID = append(m.PeerID[:0], dAtA[iNdEx:postIndex]...)
+			if m.PeerID == nil {
+				m.PeerID = []byte{}
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Proto", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			s := string(dAtA[iNdEx:postIndex])
+			m.Proto = &s
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_RemovePeer) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: RemovePeer: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: RemovePeer: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PeerID", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PeerID = append(m.PeerID[:0], dAtA[iNdEx:postIndex]...)
+			if m.PeerID == nil {
+				m.PeerID = []byte{}
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_RecvRPC) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: RecvRPC: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: RecvRPC: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReceivedFrom", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ReceivedFrom = append(m.ReceivedFrom[:0], dAtA[iNdEx:postIndex]...)
+			if m.ReceivedFrom == nil {
+				m.ReceivedFrom = []byte{}
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Meta", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Meta == nil {
+				m.Meta = &TraceEvent_RPCMeta{}
+			}
+			if err := m.Meta.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_SendRPC) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: SendRPC: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: SendRPC: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SendTo", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SendTo = append(m.SendTo[:0], dAtA[iNdEx:postIndex]...)
+			if m.SendTo == nil {
+				m.SendTo = []byte{}
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Meta", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Meta == nil {
+				m.Meta = &TraceEvent_RPCMeta{}
+			}
+			if err := m.Meta.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_DropRPC) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DropRPC: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DropRPC: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SendTo", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SendTo = append(m.SendTo[:0], dAtA[iNdEx:postIndex]...)
+			if m.SendTo == nil {
+				m.SendTo = []byte{}
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Meta", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Meta == nil {
+				m.Meta = &TraceEvent_RPCMeta{}
+			}
+			if err := m.Meta.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_Join) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Join: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Join: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Topic", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			s := string(dAtA[iNdEx:postIndex])
+			m.Topic = &s
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_Leave) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Leave: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Leave: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Topic", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			s := string(dAtA[iNdEx:postIndex])
+			m.Topic = &s
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_Graft) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Graft: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Graft: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PeerID", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PeerID = append(m.PeerID[:0], dAtA[iNdEx:postIndex]...)
+			if m.PeerID == nil {
+				m.PeerID = []byte{}
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Topic", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			s := string(dAtA[iNdEx:postIndex])
+			m.Topic = &s
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_Prune) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Prune: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Prune: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PeerID", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PeerID = append(m.PeerID[:0], dAtA[iNdEx:postIndex]...)
+			if m.PeerID == nil {
+				m.PeerID = []byte{}
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Topic", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			s := string(dAtA[iNdEx:postIndex])
+			m.Topic = &s
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_RPCMeta) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: RPCMeta: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: RPCMeta: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Messages", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Messages = append(m.Messages, &TraceEvent_MessageMeta{})
+			if err := m.Messages[len(m.Messages)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Subscription", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Subscription = append(m.Subscription, &TraceEvent_SubMeta{})
+			if err := m.Subscription[len(m.Subscription)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Control", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Control == nil {
+				m.Control = &TraceEvent_ControlMeta{}
+			}
+			if err := m.Control.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_MessageMeta) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MessageMeta: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MessageMeta: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MessageID", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.MessageID = append(m.MessageID[:0], dAtA[iNdEx:postIndex]...)
+			if m.MessageID == nil {
+				m.MessageID = []byte{}
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Topic", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			s := string(dAtA[iNdEx:postIndex])
+			m.Topic = &s
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_SubMeta) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: SubMeta: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: SubMeta: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Subscribe", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			b := bool(v != 0)
+			m.Subscribe = &b
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Topic", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			s := string(dAtA[iNdEx:postIndex])
+			m.Topic = &s
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_ControlMeta) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ControlMeta: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ControlMeta: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Ihave", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Ihave = append(m.Ihave, &TraceEvent_ControlIHaveMeta{})
+			if err := m.Ihave[len(m.Ihave)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Iwant", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Iwant = append(m.Iwant, &TraceEvent_ControlIWantMeta{})
+			if err := m.Iwant[len(m.Iwant)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Graft", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Graft = append(m.Graft, &TraceEvent_ControlGraftMeta{})
+			if err := m.Graft[len(m.Graft)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Prune", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Prune = append(m.Prune, &TraceEvent_ControlPruneMeta{})
+			if err := m.Prune[len(m.Prune)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_ControlIHaveMeta) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ControlIHaveMeta: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ControlIHaveMeta: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Topic", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			s := string(dAtA[iNdEx:postIndex])
+			m.Topic = &s
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MessageIDs", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.MessageIDs = append(m.MessageIDs, make([]byte, postIndex-iNdEx))
+			copy(m.MessageIDs[len(m.MessageIDs)-1], dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_ControlIWantMeta) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ControlIWantMeta: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ControlIWantMeta: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MessageIDs", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.MessageIDs = append(m.MessageIDs, make([]byte, postIndex-iNdEx))
+			copy(m.MessageIDs[len(m.MessageIDs)-1], dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_ControlGraftMeta) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ControlGraftMeta: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ControlGraftMeta: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Topic", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			s := string(dAtA[iNdEx:postIndex])
+			m.Topic = &s
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEvent_ControlPruneMeta) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ControlPruneMeta: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ControlPruneMeta: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Topic", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			s := string(dAtA[iNdEx:postIndex])
+			m.Topic = &s
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Peers", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Peers = append(m.Peers, make([]byte, postIndex-iNdEx))
+			copy(m.Peers[len(m.Peers)-1], dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceEventBatch) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: TraceEventBatch: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: TraceEventBatch: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Batch", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTrace
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Batch = append(m.Batch, &TraceEvent{})
+			if err := m.Batch[len(m.Batch)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTrace(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTrace
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func skipTrace(dAtA []byte) (n int, err error) {
+	l := len(dAtA)
+	iNdEx := 0
+	depth := 0
+	for iNdEx < l {
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return 0, ErrIntOverflowTrace
+			}
+			if iNdEx >= l {
+				return 0, io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		wireType := int(wire & 0x7)
+		switch wireType {
+		case 0:
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return 0, ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return 0, io.ErrUnexpectedEOF
+				}
+				iNdEx++
+				if dAtA[iNdEx-1] < 0x80 {
+					break
+				}
+			}
+		case 1:
+			iNdEx += 8
+		case 2:
+			var length int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return 0, ErrIntOverflowTrace
+				}
+				if iNdEx >= l {
+					return 0, io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				length |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if length < 0 {
+				return 0, ErrInvalidLengthTrace
+			}
+			iNdEx += length
+		case 3:
+			depth++
+		case 4:
+			if depth == 0 {
+				return 0, ErrUnexpectedEndOfGroupTrace
+			}
+			depth--
+		case 5:
+			iNdEx += 4
+		default:
+			return 0, fmt.Errorf("proto: illegal wireType %d", wireType)
+		}
+		if iNdEx < 0 {
+			return 0, ErrInvalidLengthTrace
+		}
+		if depth == 0 {
+			return iNdEx, nil
+		}
+	}
+	return 0, io.ErrUnexpectedEOF
+}
+
+var (
+	ErrInvalidLengthTrace        = fmt.Errorf("proto: negative length found during unmarshaling")
+	ErrIntOverflowTrace          = fmt.Errorf("proto: integer overflow")
+	ErrUnexpectedEndOfGroupTrace = fmt.Errorf("proto: unexpected end of group")
+)
