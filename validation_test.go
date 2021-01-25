@@ -8,10 +8,6 @@ import (
 	"testing"
 	"time"
 
-	pb "github.com/incognitochain/go-libp2p-pubsub/pb"
-
-	"github.com/libp2p/go-libp2p-core/host"
-	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
 )
 
