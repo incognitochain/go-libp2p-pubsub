@@ -11,6 +11,7 @@ type Subscription struct {
 	ch       chan *Message
 	cancelCh chan<- *Subscription
 	ctx      context.Context
+	isClosed bool
 	err      error
 }
 
@@ -43,5 +44,6 @@ func (sub *Subscription) Cancel() {
 }
 
 func (sub *Subscription) close() {
+	sub.isClosed = true
 	close(sub.ch)
 }
