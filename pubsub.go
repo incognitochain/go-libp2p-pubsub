@@ -777,6 +777,27 @@ func (p *PubSub) handleRemoveRelay(topic string) {
 	}
 }
 
+func (p *PubSub) retrySendRPC(pID peer.ID, rpc *RPC, repeated int) {
+	if repeated == 0 {
+		return
+	}
+	time.Sleep(100 * time.Millisecond)
+	retry := func() {
+		if mch, connected := p.peers[pID]; connected {
+			select {
+			case mch <- rpc:
+			default:
+				go p.retrySendRPC(pID, rpc, repeated-1)
+				// Drop it. The peer is too slow.
+			}
+		}
+	}
+	select {
+	case p.eval <- retry:
+	case <-p.ctx.Done():
+	}
+}
+
 // announce announces whether or not this node is interested in a given topic
 // Only called from processLoop.
 func (p *PubSub) announce(topic string, sub bool) {
@@ -849,8 +870,21 @@ func (p *PubSub) notifySubs(msg *Message) {
 		select {
 		case f.ch <- msg:
 		default:
+			go p.retryNotifySubs(f, msg, 5)
 			log.Infof("Can't deliver message to subscription for topic %s; subscriber too slow", topic)
 		}
+	}
+}
+
+func (p *PubSub) retryNotifySubs(sub *Subscription, msg *Message, repeated int) {
+	if (repeated == 0) || (sub.isClosed) {
+		return
+	}
+	select {
+	case sub.ch <- msg:
+	default:
+		time.Sleep(100 * time.Millisecond)
+		go p.retryNotifySubs(sub, msg, repeated-1)
 	}
 }
 

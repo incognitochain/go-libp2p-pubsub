@@ -140,9 +140,10 @@ func (t *Topic) Subscribe(opts ...SubOpt) (*Subscription, error) {
 	}
 
 	sub := &Subscription{
-		topic: t.topic,
-		ch:    make(chan *Message, 32),
-		ctx:   t.p.ctx,
+		topic:    t.topic,
+		ch:       make(chan *Message, 32),
+		isClosed: false,
+		ctx:      t.p.ctx,
 	}
 
 	for _, opt := range opts {
