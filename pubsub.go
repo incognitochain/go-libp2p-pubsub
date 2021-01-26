@@ -62,6 +62,10 @@ type PubSub struct {
 	// size of the outbound message channel that we maintain for each peer
 	peerOutboundQueueSize int
 
+	maxTimesRetry int
+
+	retryDelayDuration time.Duration
+
 	// incoming messages from other peers
 	incoming chan *RPC
 
@@ -255,6 +259,8 @@ func NewPubSub(ctx context.Context, h host.Host, rt PubSubRouter, opts ...Option
 		seenMessages:          timecache.NewTimeCache(TimeCacheDuration),
 		msgID:                 DefaultMsgIdFn,
 		counter:               uint64(time.Now().UnixNano()),
+		maxTimesRetry:         5,
+		retryDelayDuration:    200 * time.Millisecond,
 	}
 
 	for _, opt := range opts {
@@ -318,6 +324,26 @@ func WithPeerOutboundQueueSize(size int) Option {
 			return errors.New("outbound queue size must always be positive")
 		}
 		p.peerOutboundQueueSize = size
+		return nil
+	}
+}
+
+func WithMaxTimesRetry(times int) Option {
+	return func(p *PubSub) error {
+		if times <= 0 {
+			return errors.New("MaxTimesRetry must always be positive")
+		}
+		p.maxTimesRetry = times
+		return nil
+	}
+}
+
+func WithRetryDelayDuration(duration time.Duration) Option {
+	return func(p *PubSub) error {
+		if duration <= 0 {
+			return errors.New("duration must always be positive")
+		}
+		p.retryDelayDuration = duration
 		return nil
 	}
 }
@@ -861,7 +887,7 @@ func (p *PubSub) notifySubs(msg *Message) {
 			select {
 			case f.ch <- msg:
 			default:
-				go p.retryNotifySubs(f, msg, 5)
+				go p.retryNotifySubs(f, msg, p.maxTimesRetry)
 				log.Infof("Can't deliver message to subscription for topic %s; subscriber too slow", topic)
 			}
 		}
@@ -872,10 +898,10 @@ func (p *PubSub) retryNotifySubs(sub *Subscription, msg *Message, repeated int) 
 	if (repeated == 0) || (sub.isClosed) {
 		return
 	}
+	time.Sleep(p.retryDelayDuration)
 	select {
 	case sub.ch <- msg:
 	default:
-		time.Sleep(100 * time.Millisecond)
 		go p.retryNotifySubs(sub, msg, repeated-1)
 	}
 }

@@ -103,8 +103,9 @@ func (fs *FloodSubRouter) Publish(msg *Message) {
 		case mch <- out:
 			fs.tracer.SendRPC(out, pid)
 		default:
-			log.Infof("dropping message to peer %s: queue full", pid)
-			fs.tracer.DropRPC(out, pid)
+			go fs.p.retrySendRPC(pid, out, fs.p.maxTimesRetry)
+			// log.Infof("dropping message to peer %s: queue full", pid)
+			// fs.tracer.DropRPC(out, pid)
 			// Drop it. The peer is too slow.
 		}
 	}
